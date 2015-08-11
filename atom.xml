@@ -1,93 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
 
-<!DOCTYPE html>
-<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
-<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
-<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  <title>彭笑风的技术博客</title>
-  <meta name="author" content="彭笑风">
-
-  
-  <meta name="description" content="前言 唐巧曾于2011年在Blog上发过一片文章&ndash;不要在init和dealloc函数中使用accessor，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中讲解cocoa内存管理的文章第16页有一节的题目为：Don’t Use &hellip;">
-  
-
-  <!-- http://t.co/dKP3o1e -->
-  <meta name="HandheldFriendly" content="True">
-  <meta name="MobileOptimized" content="320">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  
-  <link rel="canonical" href="http://smilexiaofeng.github.io/">
-  <link href="/favicon.png" rel="icon">
-  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link href="/atom.xml" rel="alternate" title="彭笑风的技术博客" type="application/atom+xml">
-  <script src="/javascripts/modernizr-2.0.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
-  <script src="/javascripts/octopress.js" type="text/javascript"></script>
-  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
-<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
-
-  
-
-</head>
-
-<body   >
-  <header role="banner"><hgroup>
-  <h1><a href="/">彭笑风的技术博客</a></h1>
-  
-    <h2>学习，坚持，分享，成长</h2>
-  
-</hgroup>
-
-</header>
-  <nav role="navigation"><ul class="subscription" data-subscription="rss">
-  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
-  
-</ul>
-  
-<form action="https://www.google.com/search" method="get">
-  <fieldset role="search">
-    <input type="hidden" name="sitesearch" value="smilexiaofeng.github.io">
-    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
-  </fieldset>
-</form>
-  
-<ul class="main-navigation">
-  <li><a href="/">Blog</a></li>
-  <li><a href="/blog/archives">Archives</a></li>
-</ul>
-
-</nav>
-  <div id="main">
-    <div id="content">
-      <div class="blog-index">
-  
-  
-  
-    <article>
-      
-  <header>
+  <title><![CDATA[彭笑风的技术博客]]></title>
+  <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
+  <link href="http://smilexiaofeng.github.io/"/>
+  <updated>2015-08-11T22:33:44+08:00</updated>
+  <id>http://smilexiaofeng.github.io/</id>
+  <author>
+    <name><![CDATA[彭笑风]]></name>
     
-      <h1 class="entry-title"><a href="/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/">为什么不要在init和dealloc函数中使用accessor</a></h1>
-    
-    
-      <p class="meta">
-        
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
 
-
-
-
-<time class='entry-date' datetime='2015-08-11T15:10:10+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>3:10 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>前言</h3>
+  
+  <entry>
+    <title type="html"><![CDATA[为什么不要在init和dealloc函数中使用accessor]]></title>
+    <link href="http://smilexiaofeng.github.io/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/"/>
+    <updated>2015-08-11T15:10:10+08:00</updated>
+    <id>http://smilexiaofeng.github.io/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc</id>
+    <content type="html"><![CDATA[<h3>前言</h3>
 
 <p>唐巧曾于2011年在Blog上发过一片文章&ndash;<a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">不要在init和dealloc函数中使用accessor</a>，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中<a href="http://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/MemoryMgmt/MemoryMgmt.pdf">讲解cocoa内存管理的文章</a>第16页有一节的题目为：Don’t Use Accessor Methods in Initializer Methods and dealloc。文章没有说原因，唐巧在搜寻了一些资料后觉得有可能是因为在 init 和 dealloc 中，对象的存在与否还不确定，所以给对象发消息可能不会成功。但事实上并非如此。</p>
 
@@ -296,58 +227,7 @@
 <h3>参考链接</h3>
 
 <p><a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/</a></p>
-</div>
+]]></content>
+  </entry>
   
-  
-
-
-    </article>
-  
-  <div class="pagination">
-    
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
-</div>
-<aside class="sidebar">
-  
-    <section>
-  <h1>Recent Posts</h1>
-  <ul id="recent_posts">
-    
-      <li class="post">
-        <a href="/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/">为什么不要在init和dealloc函数中使用accessor</a>
-      </li>
-    
-  </ul>
-</section>
-
-
-
-
-
-  
-</aside>
-
-    </div>
-  </div>
-  <footer role="contentinfo"><p>
-  Copyright &copy; 2015 - 彭笑风 -
-  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
-</p>
-
-</footer>
-  
-
-
-
-
-
-
-
-
-
-
-
-</body>
-</html>
+</feed>

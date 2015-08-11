@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>彭笑风的技术博客</title>
+  <title>为什么不要在init和dealloc函数中使用accessor - 彭笑风的技术博客</title>
   <meta name="author" content="彭笑风">
 
   
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://smilexiaofeng.github.io/">
+  <link rel="canonical" href="http://smilexiaofeng.github.io/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="彭笑风的技术博客" type="application/atom+xml">
@@ -63,15 +63,12 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div class="blog-index">
+      <div>
+<article class="hentry" role="article">
   
-  
-  
-    <article>
-      
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/">为什么不要在init和dealloc函数中使用accessor</a></h1>
+      <h1 class="entry-title">为什么不要在init和dealloc函数中使用accessor</h1>
     
     
       <p class="meta">
@@ -87,7 +84,7 @@
   </header>
 
 
-  <div class="entry-content"><h3>前言</h3>
+<div class="entry-content"><h3>前言</h3>
 
 <p>唐巧曾于2011年在Blog上发过一片文章&ndash;<a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">不要在init和dealloc函数中使用accessor</a>，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中<a href="http://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/MemoryMgmt/MemoryMgmt.pdf">讲解cocoa内存管理的文章</a>第16页有一节的题目为：Don’t Use Accessor Methods in Initializer Methods and dealloc。文章没有说原因，唐巧在搜寻了一些资料后觉得有可能是因为在 init 和 dealloc 中，对象的存在与否还不确定，所以给对象发消息可能不会成功。但事实上并非如此。</p>
 
@@ -297,18 +294,42 @@
 
 <p><a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/</a></p>
 </div>
-  
-  
 
 
-    </article>
+  <footer>
+    <p class="meta">
+      
   
-  <div class="pagination">
+
+<span class="byline author vcard">Posted by <span class="fn">彭笑风</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-08-11T15:10:10+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>3:10 pm</span></time>
+      
+
+
+    </p>
     
-    <a href="/blog/archives">Blog Archives</a>
-    
-  </div>
+      <div class="sharing">
+  
+  
+  
 </div>
+
+    
+    <p class="meta">
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
 <aside class="sidebar">
   
     <section>
@@ -328,6 +349,7 @@
 
   
 </aside>
+
 
     </div>
   </div>
