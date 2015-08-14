@@ -9,7 +9,7 @@
   <meta name="author" content="彭笑风">
 
   
-  <meta name="description" content="前言 唐巧曾于2011年在Blog上发过一片文章&ndash;不要在init和dealloc函数中使用accessor，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中讲解cocoa内存管理的文章第16页有一节的题目为：Don’t Use &hellip;">
+  <meta name="description" content="前言 最近翻唐巧大神的Blog，发现其曾于2011年在Blog上发过一片文章&ndash;不要在init和dealloc函数中使用accessor，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中讲解cocoa内存管理的文章第16页有一节的题目为： &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -89,7 +89,7 @@
 
   <div class="entry-content"><h3>前言</h3>
 
-<p>唐巧曾于2011年在Blog上发过一片文章&ndash;<a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">不要在init和dealloc函数中使用accessor</a>，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中<a href="http://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/MemoryMgmt/MemoryMgmt.pdf">讲解cocoa内存管理的文章</a>第16页有一节的题目为：Don’t Use Accessor Methods in Initializer Methods and dealloc。文章没有说原因，唐巧在搜寻了一些资料后并未得出确切结论，只是认为一种说法比较靠谱——因为在 init 和 dealloc 中，对象的存在与否还不确定，所以给对象发消息可能不会成功。事实上并非如此。</p>
+<p>最近翻唐巧大神的Blog，发现其曾于2011年在Blog上发过一片文章&ndash;<a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">不要在init和dealloc函数中使用accessor</a>，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中<a href="http://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/MemoryMgmt/MemoryMgmt.pdf">讲解cocoa内存管理的文章</a>第16页有一节的题目为：Don’t Use Accessor Methods in Initializer Methods and dealloc，可惜文档也没有说明原因。唐巧在搜寻了一些资料后并未得出确切结论，只是认为一种说法比较靠谱——因为在 init 和 dealloc 中，对象的存在与否还不确定，所以给对象发消息可能不会成功。事实上并非如此。</p>
 
 <p>下为《<a href="https://github.com/oa414/objc-zen-book-cn">禅与 Objective-C 编程艺术</a>》的原文引用</p>
 
