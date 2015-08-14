@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-08-15T00:13:52+08:00</updated>
+  <updated>2015-08-15T00:24:11+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -68,10 +68,10 @@
 </span><span class='line'>@implementation BaseClass
 </span><span class='line'>
 </span><span class='line'>- (instancetype)init {
-</span><span class='line'>if ([super init]) {
-</span><span class='line'>self.info = @"baseInfo";
-</span><span class='line'>}
-</span><span class='line'>return self;
+</span><span class='line'>  if ([super init]) {
+</span><span class='line'>      self.info = @"baseInfo";
+</span><span class='line'>  }
+</span><span class='line'>  return self;
 </span><span class='line'>}
 </span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
 
@@ -116,16 +116,16 @@
 </span><span class='line'>@implementation SubClass
 </span><span class='line'>
 </span><span class='line'>- (instancetype)init {
-</span><span class='line'>if (self = [super init]) {
-</span><span class='line'>self.subInfo = @"subInfo";
-</span><span class='line'>}
-</span><span class='line'>return self;
+</span><span class='line'>  if (self = [super init]) {
+</span><span class='line'>      self.subInfo = @"subInfo";
+</span><span class='line'>  }
+</span><span class='line'>  return self;
 </span><span class='line'>}
 </span><span class='line'>
 </span><span class='line'>- (void)setInfo:(NSString *)info {
-</span><span class='line'>[super setInfo:info];
-</span><span class='line'>NSString* copyString = [NSString stringWithString:self.subInfo];
-</span><span class='line'>NSLog(@"%@",copyString);
+</span><span class='line'>  [super setInfo:info];
+</span><span class='line'>  NSString* copyString = [NSString stringWithString:self.subInfo];
+</span><span class='line'>  NSLog(@"%@",copyString);
 </span><span class='line'>}
 </span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
 
@@ -158,7 +158,7 @@
 </span><span class='line'>@implementation BaseClass
 </span><span class='line'>
 </span><span class='line'>- (void)dealloc {
-</span><span class='line'>self.info = nil;
+</span><span class='line'>  self.info = nil;
 </span><span class='line'>}
 </span><span class='line'>
 </span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
@@ -199,18 +199,18 @@
 </span><span class='line'>@implementation SubClass
 </span><span class='line'>
 </span><span class='line'>- (instancetype)init {
-</span><span class='line'>if (self = [super init]) {
-</span><span class='line'>_debugInfo = @"This is SubClass";
-</span><span class='line'>}
-</span><span class='line'>return self;
+</span><span class='line'>  if (self = [super init]) {
+</span><span class='line'>      _debugInfo = @"This is SubClass";
+</span><span class='line'>  }
+</span><span class='line'>  return self;
 </span><span class='line'>}
 </span><span class='line'>
 </span><span class='line'>- (void)setInfo:(NSString *)info {
-</span><span class='line'>NSLog(@"%@",[NSString stringWithString:self.debugInfo]);
+</span><span class='line'>  NSLog(@"%@",[NSString stringWithString:self.debugInfo]);
 </span><span class='line'>}
 </span><span class='line'>
 </span><span class='line'>- (void)dealloc {
-</span><span class='line'>_debugInfo = nil;
+</span><span class='line'>  _debugInfo = nil;
 </span><span class='line'>}
 </span><span class='line'>
 </span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
