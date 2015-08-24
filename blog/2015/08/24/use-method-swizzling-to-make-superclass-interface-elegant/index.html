@@ -1,24 +1,90 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[彭笑风的技术博客]]></title>
-  <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
-  <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-08-24T16:37:50+08:00</updated>
-  <id>http://smilexiaofeng.github.io/</id>
-  <author>
-    <name><![CDATA[彭笑风]]></name>
-    
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>通过Method Swizzling让基类接口更优雅 - 彭笑风的技术博客</title>
+  <meta name="author" content="彭笑风">
 
   
-  <entry>
-    <title type="html"><![CDATA[通过Method Swizzling让基类接口更优雅]]></title>
-    <link href="http://smilexiaofeng.github.io/blog/2015/08/24/use-method-swizzling-to-make-superclass-interface-elegant/"/>
-    <updated>2015-08-24T10:18:47+08:00</updated>
-    <id>http://smilexiaofeng.github.io/blog/2015/08/24/use-method-swizzling-to-make-superclass-interface-elegant</id>
-    <content type="html"><![CDATA[<p>在使用Objc做IOS开发的过程中，特别是实现基类提供给他人让其通过继承获得便利的开发过程中，我们经常会碰到一种需求——即使用者重写了我们的方法，仍需要其调用基类方法。靠约定要求使用者调用<code>[super method]</code>则使用者很可能忘记调用而产生Bug。下面将简要说明三种解决方法，重点在于第三种，让我们基类的接口更加优雅。</p>
+  <meta name="description" content="在使用Objc做IOS开发的过程中，特别是实现基类提供给他人让其通过继承获得便利的开发过程中，我们经常会碰到一种需求——即使用者重写了我们的方法，仍需要其调用基类方法。靠约定要求使用者调用[super method]则使用者很可能忘记调用而产生Bug。下面将简要说明三种解决方法，重点在于第三种， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://smilexiaofeng.github.io/blog/2015/08/24/use-method-swizzling-to-make-superclass-interface-elegant/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="彭笑风的技术博客" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">彭笑风的技术博客</a></h1>
+  
+    <h2>学习，坚持，分享，成长</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="smilexiaofeng.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">所有文章</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">通过Method Swizzling让基类接口更优雅</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-08-24T10:18:47+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:18 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>在使用Objc做IOS开发的过程中，特别是实现基类提供给他人让其通过继承获得便利的开发过程中，我们经常会碰到一种需求——即使用者重写了我们的方法，仍需要其调用基类方法。靠约定要求使用者调用<code>[super method]</code>则使用者很可能忘记调用而产生Bug。下面将简要说明三种解决方法，重点在于第三种，让我们基类的接口更加优雅。</p>
 
 <h3>共有代码改为内部实现</h3>
 
@@ -427,224 +493,121 @@
 <p>Method Swizzling相当强大，能做什么全凭自己的想象力。作为接口的提供者甚至框架的设计者，我们服务的对象是程序员，我们要有使用者就是上帝的觉悟，最好能在背后默默提供诸多功能而尽量不打扰使用者的编写逻辑。宁愿下层复杂，也要尽量让上层简单。苹果是这么做的，所以我们如此享受在IOS平台下发挥自己的才智。而如果能得到同行的肯定，那就是对我们最好的认可。</p>
 
 <h3></h3>
-]]></content>
-  </entry>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
   
-  <entry>
-    <title type="html"><![CDATA[为什么不要在init和dealloc函数中使用accessor]]></title>
-    <link href="http://smilexiaofeng.github.io/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/"/>
-    <updated>2015-08-11T15:10:10+08:00</updated>
-    <id>http://smilexiaofeng.github.io/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc</id>
-    <content type="html"><![CDATA[<h3>前言</h3>
 
-<p>最近翻唐巧大神的Blog，发现其曾于2011年在Blog上发过一片文章&ndash;<a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">不要在init和dealloc函数中使用accessor</a>，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中<a href="http://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/MemoryMgmt/MemoryMgmt.pdf">讲解cocoa内存管理的文章</a>第16页有一节的题目为：Don’t Use Accessor Methods in Initializer Methods and dealloc，可惜文档也没有说明原因。唐巧在搜寻了一些资料后并未得出确切结论，只是认为一种说法比较靠谱——因为在 init 和 dealloc 中，对象的存在与否还不确定，所以给对象发消息可能不会成功。事实上并非如此。</p>
+<span class="byline author vcard">Posted by <span class="fn">彭笑风</span></span>
 
-<p>下为《<a href="https://github.com/oa414/objc-zen-book-cn">禅与 Objective-C 编程艺术</a>》的原文引用</p>
-
-<blockquote><p>objc创建对象的特性为两步创建：</p>
-
-<ul>
-<li><code>alloc</code> 负责创建对象，这个过程包括分配足够的内存来保存对象，写入 <code>isa</code> 指针，初始化引用计数，以及重置所有实例变量。</li>
-<li><code>init</code> 负责初始化对象，这意味着使对象处于可用状态。这通常意味着为对象的实例变量赋予合理有用的值。</li>
-</ul>
+      
 
 
-<p><code>alloc</code> 方法将返回一个有效的未初始化的对象实例。每一个对这个实例发送的消息会被转换成一次<code>objc_msgSend()</code> 函数的调用，形参 <code>self</code> 的实参是 <code>alloc</code> 返回的指针；这样 <code>self</code> 在所有方法的作用域内都能够被访问。 按照惯例，为了完成两步创建，新创建的实例第一个被调用的方法将是 <code>init</code>方法。注意，<code>NSObject</code> 在实现 <code>init</code> 时，只是简单的返回了 <code>self</code>。</p></blockquote>
-
-<p>可见alloc完后就可以直接对对象发送消息了，不存在可能不成功的情况。所以接下来想和大家一起探讨下为什么不能在init和dealloc中使用accessor。</p>
-
-<h3>原因</h3>
-
-<p>我认为，不能在init和dealloc中使用accessor的原因是由于面向对象的继承、多态特性与accessor可能造成的副作用联合导致的。继承和多态导致在父类的实现中调用accessor可能导致调用到子类重写的accessor，而此时子类部分并未完全初始化或已经销毁，导致原有的假设不成立，从而出现一系列的逻辑问题甚至崩溃。为了更清晰地阐述，以下分别从init和dealloc上举例说明。</p>
-
-<h3>Init example</h3>
-
-<p>BaseClass:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@interface BaseClass : NSObject
-</span><span class='line'>
-</span><span class='line'>@property(nonatomic) NSString* info;
-</span><span class='line'>
-</span><span class='line'>@end
-</span><span class='line'>
-</span><span class='line'>@implementation BaseClass
-</span><span class='line'>
-</span><span class='line'>- (instancetype)init {
-</span><span class='line'>  if ([super init]) {
-</span><span class='line'>      self.info = @"baseInfo";
-</span><span class='line'>  }
-</span><span class='line'>  return self;
-</span><span class='line'>}
-</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
 
 
-<p>SubClass:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@interface SubClass : BaseClass
-</span><span class='line'>
-</span><span class='line'>@end
-</span><span class='line'>
-</span><span class='line'>@interface SubClass ()
-</span><span class='line'>
-</span><span class='line'>@property (nonatomic) NSString* subInfo;
-</span><span class='line'>
-</span><span class='line'>@end
-</span><span class='line'>
-</span><span class='line'>@implementation SubClass
-</span><span class='line'>
-</span><span class='line'>- (instancetype)init {
-</span><span class='line'>  if (self = [super init]) {
-</span><span class='line'>      self.subInfo = @"subInfo";
-</span><span class='line'>  }
-</span><span class='line'>  return self;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>- (void)setInfo:(NSString *)info {
-</span><span class='line'>  [super setInfo:info];
-</span><span class='line'>  NSString* copyString = [NSString stringWithString:self.subInfo];
-</span><span class='line'>  NSLog(@"%@",copyString);
-</span><span class='line'>}
-</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+<time class='entry-date' datetime='2015-08-24T10:18:47+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:18 am</span></time>
+      
 
 
-<p>当执行<code>[[SubClass alloc]init]</code>时会调用父类在Init方法。其中调用了accessor，去初始化父类部分的info属性。看起来十分正常，但一旦子类重写了该方法，那么由于多态此时调用的就是子类的accessor方法！子类的accessor实现中的代码都是以子类部分已初始化完全为前提编写，即子类部分已经初始化完毕，完全可用，而现实情况是其init方法并没有执行完，对此假设并不成立，从而可能造成崩溃。以上例子有人造的痕迹，现实中更多的是某个方法被少调用一次，出现逻辑错误。</p>
-
-<h3>dealloc example</h3>
-
-<p>BaseClass:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@interface BaseClass : NSObject
-</span><span class='line'>
-</span><span class='line'>@property(nonatomic) NSString* info;
-</span><span class='line'>
-</span><span class='line'>@end
-</span><span class='line'>
-</span><span class='line'>@implementation BaseClass
-</span><span class='line'>
-</span><span class='line'>- (void)dealloc {
-</span><span class='line'>  self.info = nil;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
-
-
-<p>SubClass:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>@interface SubClass : BaseClass
-</span><span class='line'>
-</span><span class='line'>@property (nonatomic) NSString* debugInfo;
-</span><span class='line'>
-</span><span class='line'>@end
-</span><span class='line'>
-</span><span class='line'>@implementation SubClass
-</span><span class='line'>
-</span><span class='line'>- (instancetype)init {
-</span><span class='line'>  if (self = [super init]) {
-</span><span class='line'>      _debugInfo = @"This is SubClass";
-</span><span class='line'>  }
-</span><span class='line'>  return self;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>- (void)setInfo:(NSString *)info {
-</span><span class='line'>  NSLog(@"%@",[NSString stringWithString:self.debugInfo]);
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>- (void)dealloc {
-</span><span class='line'>  _debugInfo = nil;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在SubClass的实例对象销毁时，首先调用子类的dealloc，再调用父类的dealloc。如果父类在dealloc时调用了accessor 并且该accessor被子类重写，就会调用到子类的accessor。而此时子类的dealloc已经被调用了，基于其完整的假设已经不成立，那么再执行子类的代码会存在一定风险，如上例就会崩溃。</p>
-
-<h3>结语</h3>
-
-<p>在init和dealloc中使用accessor是存在风险的。即使现在代码没有问题，难保将来维护或扩展时会出现问题。只有将苹果所说的Don’t Use Accessor Methods in Initializer Methods and dealloc当作一条编程规范，才能从根本上规避这个问题。规矩立好了，代码欠的债就少，将来的生活就会更加美好。</p>
-
-<hr />
-
-<h3>参考链接</h3>
-
-<p><a href="http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/">http://www.devtang.com/blog/2011/08/10/do-not-use-accessor-in-init-and-dealloc-method/</a></p>
-]]></content>
-  </entry>
+    </p>
+    
+      <div class="sharing">
   
-</feed>
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+	<span class="jiathis_txt">分享到：</span>
+	<a class="jiathis_button_tools_1"></a>
+	<a class="jiathis_button_tools_2"></a>
+	<a class="jiathis_button_tools_3"></a>
+	<a class="jiathis_button_tools_4"></a>
+	<a href="http://www.jiathis.com/share?uid=2049882" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=2049882" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2049882"></script>
+<!-- UY END -->
+
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/" title="Previous Post: 为什么不要在init和dealloc函数中使用accessor">&laquo; 为什么不要在init和dealloc函数中使用accessor</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/08/24/use-method-swizzling-to-make-superclass-interface-elegant/">通过Method Swizzling让基类接口更优雅</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/">为什么不要在init和dealloc函数中使用accessor</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>About Me</h1>
+  <p>IOS开发者，对技术狂热，对人真诚。曾在网易工作过两年，现已回到长沙。希望能和你分享在开发过程中的一些小小心得。
+<br />
+<br />
+新浪微博：<a href="http://weibo.com/smilepengxiaofeng">Smile笑风</a>
+<br />
+常用邮箱：pengxfsmile@gmail.com
+<br />
+</p>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2015 - 彭笑风 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

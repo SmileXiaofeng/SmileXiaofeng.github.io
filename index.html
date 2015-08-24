@@ -9,7 +9,7 @@
   <meta name="author" content="彭笑风">
 
   
-  <meta name="description" content="前言 最近翻唐巧大神的Blog，发现其曾于2011年在Blog上发过一片文章&ndash;不要在init和dealloc函数中使用accessor，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中讲解cocoa内存管理的文章第16页有一节的题目为： &hellip;">
+  <meta name="description" content="在使用Objc做IOS开发的过程中，特别是实现基类提供给他人让其通过继承获得便利的开发过程中，我们经常会碰到一种需求——即使用者重写了我们的方法，仍需要其调用基类方法。靠约定要求使用者调用[super method]则使用者很可能忘记调用而产生Bug。下面将简要说明三种解决方法，重点在于第三种， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -65,6 +65,443 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/24/use-method-swizzling-to-make-superclass-interface-elegant/">通过Method Swizzling让基类接口更优雅</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-08-24T10:18:47+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>10:18 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>在使用Objc做IOS开发的过程中，特别是实现基类提供给他人让其通过继承获得便利的开发过程中，我们经常会碰到一种需求——即使用者重写了我们的方法，仍需要其调用基类方法。靠约定要求使用者调用<code>[super method]</code>则使用者很可能忘记调用而产生Bug。下面将简要说明三种解决方法，重点在于第三种，让我们基类的接口更加优雅。</p>
+
+<h3>共有代码改为内部实现</h3>
+
+<p>既然基类的代码一定要被调用，那么就可以将其封装在基类内部，置于程序逻辑的必经之路上，从而保证其被调用。</p>
+
+<p>举个栗子：</p>
+
+<p>父类有个方法必须调用</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@interface BaseClass : NSObject
+</span><span class='line'>
+</span><span class='line'>- (void)mustCallSuperMethod;
+</span><span class='line'>
+</span><span class='line'>@end
+</span><span class='line'>
+</span><span class='line'>@implementation BaseClass
+</span><span class='line'>
+</span><span class='line'>- (instancetype)init {
+</span><span class='line'>    if (self = [super init]) {
+</span><span class='line'>        [self mustCallSuperMethod];
+</span><span class='line'>    }
+</span><span class='line'>    return self;
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (void)mustCallSuperMethod {
+</span><span class='line'>    [self mustDo];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (void)mustDo {
+</span><span class='line'>    //do something
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>子类调用父类方法再实现自己逻辑</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@interface SubClass : BaseClass
+</span><span class='line'>@end
+</span><span class='line'>
+</span><span class='line'>@implementation SubClass
+</span><span class='line'>
+</span><span class='line'>- (void)mustCallSuperMethod {
+</span><span class='line'>    [super mustCallSuperMethod];
+</span><span class='line'>    //do adittion work
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样基类实现可以改为:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@implementation BaseClass
+</span><span class='line'>
+</span><span class='line'>- (instancetype)init {
+</span><span class='line'>    if (self = [super init]) {
+</span><span class='line'>        [self internalMustCallSuperMethod];
+</span><span class='line'>    }
+</span><span class='line'>    return self;
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (void)internalMustCallSuperMethod {
+</span><span class='line'>    [self mustDo];
+</span><span class='line'>    [self noNeedCallSuper];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (void)mustDo {
+</span><span class='line'>    //do something
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (void)noNeedCallSuper {
+</span><span class='line'>  //empty
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样子类只需要使用noNeedCallSuper就可以达到目的了，不存在忘记调用的风险。</p>
+
+<h3>使用编译器指令__attribute__</h3>
+
+<p>Clang里有一条指令__attribute__((objc_requires_super))相当方便，在基类方法加上这条指令后，任何子类未调用基类方法时都会产生警告，提醒使用者进行调用。</p>
+
+<p>这样基类只需要做如下修改即可：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@interface BaseClass : NSObject
+</span><span class='line'>- (void)mustCallSuperMethod __attribute__((objc_requires_super));
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更多的__attribute__指令请参见<a href="http://clang.llvm.org/docs/AttributeReference.html">Clang文档</a>。</p>
+
+<h3>使用Method Swizzling</h3>
+
+<p>关于Method Swizzling这个话题在此不展开讨论了，在<a href="http://tech.glowing.com/cn/method-swizzling-aop/">Glow技术团队博客的这篇文章</a>里已经做了较为详细的介绍，<a href="http://tech.glowing.com/cn/method-swizzling-aop/">雷纯锋同学的文章</a>也从原理方面进行了较为详细的介绍，简单地说，通过Method Swizzling可以在已有方法之前或之后注入一段代码，甚至替换掉整个实现。自己实现Method Swizzling需要考虑的方面很多，容易出错。幸运地是，已经有了一个比较成熟的第三方库：<a href="https://github.com/steipete/Aspects">Aspects</a>。其API相当简洁，使用起来也很方便。需要指出的是，应该使用1.42及以上的版本，旧版本存在一个严重的Bug，同一继承结构中对同一方法在不同类中只能做一次Method Swizzling,即使是两个不同的子类也不行。</p>
+
+<p>说说我的故事吧。我们公司的主打产品是一个菜谱App，几乎所有的页面都带有TableView，很多页面都存在上拉刷新，下拉加载更多，显示通用无网，空数据页面，从网络或数据库中拉去数据进行显示的需求。为了提高代码的复用和可维护性，减少VC的重量，实现模型和展示的拆分，我们希望对其进行封装。之前使用的是Facebook出品的three20上进行封装的库。three20已弃坑数年，缺乏FB大神的支持，自己维护起来越来越吃力，所以打算重新封装一套接口提高封装性和开发效率。</p>
+
+<p>为了实现封装，需要对带TableView的基类Controller做一些前置操作。之前放出来的四个接口是这样的：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>- (NSInteger)tableViewEx:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section;
+</span><span class='line'>
+</span><span class='line'>- (CGFloat)tableViewEx:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
+</span><span class='line'>
+</span><span class='line'>-(NSString*)tableViewEx:(UITableView *)tableView cellIdentifierForRowAtIndexPath:(NSIndexPath *)indexPath;
+</span><span class='line'>
+</span><span class='line'>- (UITableViewCell *)tableViewEx:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>基类实现了不带Ex的方法，实现了必要的逻辑，并在其后调用了相应的Ex方法，让子类去重写。是的，它可以工作，并且是本文中所说的第一种方法，但这是一种足够好的封装吗？</p>
+
+<p>第一，我们希望能让接口尽量自然，能悄无声息地提供强大而完善的功能。这四个方法如此常用，其中的Ex仿佛只要998的八星八箭水晶钻闪得眼睛睁不开，无时无刻不在提醒你写的并不是TableView的Delegate方法。</p>
+
+<p>第二，因为基类是服从于TableView的Delegate的DataSource协议的，子类可以很轻易地重写不带Ex的方法。一旦这么做了，那么一些我们假设会运行的逻辑代码不会走到，会出现各种各样的Bug。</p>
+
+<p>为了能在相应代理方法在执行前运行自己的逻辑代码，很容易就能想到使用Method Swizzing。为了让子类尽量轻便，这一切都需要在基类中实现。我首先想到的是在基类的<code>+(void)load</code>中做这件事，可实际做的时候却发现了问题：基类原方法内容为空，并对这个空方法进行Swizzling并注入必须执行的代码，但只要子类没有显式调用super的方法，这个hook也不会被触发。那么如何才能偷天换日，让子类悄无声息地实现Method Swizzling呢？</p>
+
+<p>我想到了<code>+ (void)initialize</code>。</p>
+
+<h3>initialize</h3>
+
+<p>关于<code>initialize</code>的原理和功能可以参见<a href="http://blog.leichunfeng.com/blog/2015/05/02/objective-c-plus-load-vs-plus-initialize/">雷纯锋同学的这篇文章</a>。简单描述的话，类的<code>initialize</code>方法会在收到第一条消息之前调用，而且是通过<strong>发消息</strong>的方式实现的。于是脑洞一开，将基类的原方法的内容移除并留一个空的实现（有返回值的<code>return nil</code>），内容移至Method Swizzling中，无返回值注入，有返回值替换原方法，那么如果在基类的<code>initialize</code>方法中做了Swizzling，只要子类未重写该方法，就一定会调用到父类的方法，通过<code>[self class]</code>取到子类的Class从而对每一个子类完成Swizzling(子类重写<code>initialize</code>方法的几率非常小，而且可与通过调用<code>[super initialize]</code>解决这个问题)。这也意味着，基类的Swizzling过程不能写在dispatch_once中。</p>
+
+<p>可能有的人看到这里已经菊花一紧了。<a href="http://nshipster.com/method-swizzling/">mattt大神</a> 已经千叮咛万嘱咐:</p>
+
+<blockquote><p><strong>Swizzling should always be done in +load.</strong></p>
+
+<p><strong>Swizzling should always be done in a dispatch_once.</strong></p></blockquote>
+
+<p>直接两条全部违反了。不过仔细看看其博文，这么做的原因都是为了最小化Method Swizzling的影响。我们现在要影响所有子类，当然也没法再扭扭捏捏地控制影响范围了。</p>
+
+<p>之前提到过<code>initialize</code>是通过发消息实现的，这就意味着，一旦子类未实现该方法，其会调用父类的<code>initialize</code>方法。试想一个场景：A,B,C三个类，仅A实现了<code>initialize</code>方法，并且B继承于A，C继承于B。当给C发第一条消息时，其发现其父类未初始化就会先初始化父类，所以分别会对A，B，C发送<code>initialize</code>消息。而只有A实现了该方法，根据消息机制，A的<code>initialize</code>方法会被调用三遍，self指针分别指向A,B,C三个类。为了避免这个问题，在基类中应当这么实现：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>+ (void)initialize {
+</span><span class='line'>    if (self == [AClass class]) {
+</span><span class='line'>        return;
+</span><span class='line'>    }
+</span><span class='line'>    //do method swizzling
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果存在中间继承类B（继承于A，不会被实例化仅仅为了作为基类），为了不中断A的调用且不重复调用，应当这么实现：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>+ (void)initialize {
+</span><span class='line'>    if (self != [BClass class]) {
+</span><span class='line'>        [super initialize];
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自己做好自己的事情，很好。</p>
+
+<p>最后附上一段示例代码及实际代码</p>
+
+<p>栗子：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@interface BaseClass : NSObject
+</span><span class='line'>- (void)implementInSubclass;
+</span><span class='line'>@end
+</span><span class='line'>
+</span><span class='line'>#pragma clang diagnostic push
+</span><span class='line'>#pragma clang diagnostic ignored "-Wincomplete-implementation"
+</span><span class='line'>@implementation BaseClass
+</span><span class='line'>
+</span><span class='line'>+ (void)initialize {
+</span><span class='line'>    if (self == [BaseClass class]) {
+</span><span class='line'>        return;
+</span><span class='line'>    }
+</span><span class='line'>    [[self class] aspect_hookSelector:@selector(implementInSubclass) withOptions:AspectPositionBefore usingBlock:^(id&lt;AspectInfo&gt; aspectInfo) {
+</span><span class='line'>        BaseClass* instance = [aspectInfo instance];
+</span><span class='line'>        [instance toPrepareWork];
+</span><span class='line'>    } error:nil];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (instancetype)init {
+</span><span class='line'>    if (self = [super init]) {
+</span><span class='line'>        [self implementInSubclass];
+</span><span class='line'>    }
+</span><span class='line'>    return self;
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (void)implementInSubclass {
+</span><span class='line'>    //empty
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (void)toPrepareWork {
+</span><span class='line'>    //blablabla
+</span><span class='line'>}
+</span><span class='line'>#pragma clang diagnostic pop
+</span><span class='line'>@end
+</span><span class='line'>
+</span><span class='line'>@interface SubClass : BaseClass
+</span><span class='line'>@end
+</span><span class='line'>
+</span><span class='line'>- (void)implementInSubclass {
+</span><span class='line'>    //do your work
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>实际代码</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>@implementation HDTableViewController
+</span><span class='line'>
+</span><span class='line'>+ (void)initialize {
+</span><span class='line'>    if (self == [HDTableViewController class]) {
+</span><span class='line'>        return;
+</span><span class='line'>    }
+</span><span class='line'>    [self initializeHookCellForRow];
+</span><span class='line'>    [self initializeHookLoadFail];
+</span><span class='line'>    [self initializeHookModelDidFinishLoad];
+</span><span class='line'>    [self initializeHookDidSelectCell];
+</span><span class='line'>    [self initializeHookCellHeight];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>+ (void)initializeHookCellHeight {
+</span><span class='line'>    [[self class] aspect_hookSelector:@selector(tableView:heightForRowAtIndexPath:) withOptions:AspectPositionInstead usingBlock:^(id&lt;AspectInfo&gt; aspectInfo) {
+</span><span class='line'>        NSInvocation *invocation = [aspectInfo originalInvocation];
+</span><span class='line'>
+</span><span class='line'>        NSArray* arguments = [aspectInfo arguments];
+</span><span class='line'>        UITableView* tableView = arguments[0];
+</span><span class='line'>        NSIndexPath* indexPath = arguments[1];
+</span><span class='line'>        HDTableViewController* instance = [aspectInfo instance];
+</span><span class='line'>
+</span><span class='line'>        if ([tableView isEqual:instance.tableView]) {
+</span><span class='line'>            if (indexPath.section+1 == [instance numberOfSectionsInTableView:tableView]) {
+</span><span class='line'>                if ([instance tableViewIsEmpty:tableView]) {
+</span><span class='line'>                    CGFloat emptyHeight = [instance      tableViewEmptyCellHeight:tableView];
+</span><span class='line'>                    [invocation setReturnValue:&emptyHeight];
+</span><span class='line'>                    return;
+</span><span class='line'>                }
+</span><span class='line'>            }
+</span><span class='line'>        }
+</span><span class='line'>        [invocation invoke];
+</span><span class='line'>    } error:nil];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+</span><span class='line'>    return 0;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>结语</h3>
+
+<p>Method Swizzling相当强大，能做什么全凭自己的想象力。作为接口的提供者甚至框架的设计者，我们服务的对象是程序员，我们要有使用者就是上帝的觉悟，最好能在背后默默提供诸多功能而尽量不打扰使用者的编写逻辑。宁愿下层复杂，也要尽量让上层简单。苹果是这么做的，所以我们如此享受在IOS平台下发挥自己的才智。而如果能得到同行的肯定，那就是对我们最好的认可。</p>
+
+<h3></h3>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -314,6 +751,10 @@
     <section>
   <h1>最新文章</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/08/24/use-method-swizzling-to-make-superclass-interface-elegant/">通过Method Swizzling让基类接口更优雅</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/">为什么不要在init和dealloc函数中使用accessor</a>
