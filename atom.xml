@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-08-24T18:57:26+08:00</updated>
+  <updated>2015-08-24T20:45:29+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -191,7 +191,7 @@
 </span><span class='line'>
 </span><span class='line'>- (CGFloat)tableViewEx:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
 </span><span class='line'>
-</span><span class='line'>-(NSString*)tableViewEx:(UITableView *)tableView cellIdentifierForRowAtIndexPath:(NSIndexPath *)indexPath;
+</span><span class='line'>- (NSString*)tableViewEx:(UITableView *)tableView cellIdentifierForRowAtIndexPath:(NSIndexPath *)indexPath;
 </span><span class='line'>
 </span><span class='line'>- (UITableViewCell *)tableViewEx:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath;</span></code></pre></td></tr></table></div></figure>
 
@@ -296,15 +296,10 @@
 <span class='line-number'>38</span>
 <span class='line-number'>39</span>
 <span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>@interface BaseClass : NSObject
 </span><span class='line'>- (void)implementInSubclass;
 </span><span class='line'>@end
 </span><span class='line'>
-</span><span class='line'>#pragma clang diagnostic push
-</span><span class='line'>#pragma clang diagnostic ignored "-Wincomplete-implementation"
 </span><span class='line'>@implementation BaseClass
 </span><span class='line'>
 </span><span class='line'>+ (void)initialize {
@@ -331,7 +326,6 @@
 </span><span class='line'>- (void)toPrepareWork {
 </span><span class='line'>    //blablabla
 </span><span class='line'>}
-</span><span class='line'>#pragma clang diagnostic pop
 </span><span class='line'>@end
 </span><span class='line'>
 </span><span class='line'>@interface SubClass : BaseClass
