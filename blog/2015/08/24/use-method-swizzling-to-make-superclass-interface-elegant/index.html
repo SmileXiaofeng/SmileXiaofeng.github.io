@@ -264,17 +264,17 @@
 
 <p>基类实现了不带Ex的方法，实现了必要的逻辑，并在其后调用了相应的Ex方法，让子类去重写。是的，它可以工作，并且是本文中所说的第一种方法，但这是一种足够好的封装吗？</p>
 
-<p>第一，我们希望能让接口尽量自然，能悄无声息地提供强大而完善的功能。这四个方法如此常用，其中的Ex仿佛只要998的八星八箭水晶钻闪得眼睛睁不开，无时无刻不在提醒你写的并不是TableView的Delegate方法。</p>
+<p>第一，我们希望能让接口尽量自然，能悄无声息地提供强大而完善的功能。这四个方法如此常用，其中的Ex仿佛只要998的八星八箭水晶钻闪得眼睛都睁不开，无时无刻不在提醒你写的并不是TableView的Delegate方法。</p>
 
 <p>第二，因为基类是服从于TableView的Delegate的DataSource协议的，子类可以很轻易地重写不带Ex的方法。一旦这么做了，那么父类方法会被覆盖，一些我们假设会运行的逻辑代码不会走到，会出现各种各样的Bug。</p>
 
-<p>为了能在相应代理方法在执行前运行自己的逻辑代码，很容易想到了使用Method Swizzing。为了让子类尽量轻便，这一切都需要在基类中实现。我首先想到的是在基类的<code>+(void)load</code>中做这件事，可实际做的时候却发现了问题：基类原方法内容为空，并对这个空方法进行Swizzling并注入必须执行的代码，但只要子类没有显式调用super的方法，这个hook也不会被触发。那么如何才能偷天换日，让子类悄无声息地实现Method Swizzling呢？</p>
+<p>为了能在相应代理方法执行前运行自己的逻辑代码，很容易想到了使用Method Swizzing。为了让子类尽量轻便，这一切都需要在基类中实现。我首先想到的是在基类的<code>+(void)load</code>中做这件事，可实际做的时候却发现了问题：基类原方法内容为空，并对这个空方法进行Swizzling注入必须执行的代码，但只要子类没有显式调用super的方法，这个hook就不会被触发。那么如何才能偷天换日，让子类悄无声息地实现Method Swizzling呢？</p>
 
 <p>我想到了<code>+ (void)initialize</code>。</p>
 
 <h3>initialize</h3>
 
-<p>关于<code>initialize</code>的原理和功能可以参见<a href="http://blog.leichunfeng.com/blog/2015/05/02/objective-c-plus-load-vs-plus-initialize/">雷纯锋同学的这篇文章</a>。简单描述的话，类的<code>initialize</code>方法会在收到第一条消息之前调用，而且是通过<strong>发消息</strong>的方式实现的。于是脑洞一开，将基类的原方法的内容移除并留一个空的实现（有返回值的<code>return nil</code>），内容移至Method Swizzling中，无返回值注入，有返回值替换原方法，那么如果在基类的<code>initialize</code>方法中做了Swizzling，只要子类未重写该方法，就一定会调用到父类的方法，通过<code>[self class]</code>取到子类的Class从而对每一个子类完成Swizzling(子类重写<code>initialize</code>方法的几率非常小，而且可与通过调用<code>[super initialize]</code>解决这个问题)。这也意味着，基类的Swizzling过程不能写在<code>dispatch_once</code>中。</p>
+<p>关于<code>initialize</code>的原理和功能可以参见<a href="http://blog.leichunfeng.com/blog/2015/05/02/objective-c-plus-load-vs-plus-initialize/">雷纯锋同学的这篇文章</a>。简单描述的话，类的<code>initialize</code>方法会在收到第一条消息之前调用，而且是通过<strong>发消息</strong>的方式实现的。于是脑洞一开，将基类的原方法的内容移除并留一个空的实现（有返回值的<code>return nil</code>），内容移至Method Swizzling中，无返回值的函数进行注入，有返回值的替换原方法，那么如果在基类的<code>initialize</code>方法中做了Swizzling，只要子类未重写该方法，就一定会调用到父类的方法，通过<code>[self class]</code>取到子类的Class从而对每一个子类完成Swizzling(子类重写<code>initialize</code>方法的几率非常小，而且可与通过调用<code>[super initialize]</code>解决这个问题)。这也意味着，基类的Swizzling过程不能写在<code>dispatch_once</code>中。</p>
 
 <p>可能有的人看到这里已经菊花一紧了。<a href="http://nshipster.com/method-swizzling/">mattt大神</a> 已经千叮咛万嘱咐:</p>
 
@@ -316,7 +316,7 @@
 
 <p>自己做好自己的事情，很好。</p>
 
-<p>在封装的带TableView的Controller采用了这种方法后，子类继承后可以直接重写TableView的Delegate方法并且获得刷新，分页，在需要时显示空白、无网络页面等诸多功能。</p>
+<p>在封装的带TableView的Controller采用了这种方法后，子类继承后可以直接重写TableView的Delegate方法并且获得刷新，分页，在需要时显示空白、无网络页面等诸多功能，不再需要使用恶心的Ex方法。</p>
 
 <p>最后附上一段示例代码及实际代码</p>
 
@@ -404,7 +404,7 @@
 </span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
 
 
-<p>实际代码</p>
+<p>实际代码：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -486,7 +486,7 @@
 
 <h3>结语</h3>
 
-<p>Method Swizzling相当强大，能做什么全凭自己的想象力。作为接口的提供者甚至框架的设计者，我们服务的对象是程序员，我们要有使用者就是上帝的觉悟，最好能在背后默默提供诸多功能而尽量不打扰使用者的编写逻辑。宁愿下层复杂，也要尽量让上层简单。苹果是这么做的，所以我们如此享受在IOS平台下发挥自己的才智。而如果能得到同行的肯定，那就是对我们最好的认可。</p>
+<p>Method Swizzling相当强大，能做什么全凭自己的想象力。作为接口的提供者甚至框架的设计者，我们服务的对象是程序员，我们要有使用者就是上帝的觉悟，最好能在背后默默提供诸多功能而尽量不打扰使用者的编写逻辑。宁愿下层复杂，也要尽量让上层简单。苹果是这么做的，所以我们才如此享受在IOS平台下发挥自己的才智。而如果能得到同行的肯定，那也是对我们最好的认可。</p>
 
 <h3></h3>
 </div>
