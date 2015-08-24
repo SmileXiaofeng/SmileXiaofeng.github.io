@@ -10,7 +10,7 @@
 
   
   <meta name="description" content="前言 最近翻唐巧大神的Blog，发现其曾于2011年在Blog上发过一片文章&ndash;不要在init和dealloc函数中使用accessor，即调用get,set方法的点语法，相信绝大多数人都这么做过（包括我）。其中提到苹果的开发者文档中讲解cocoa内存管理的文章第16页有一节的题目为： &hellip;">
-  
+  <meta name="keywords" content="init dealloc,accessor,set,get">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -391,7 +391,16 @@ var jiathis_config = {data_track_clickback:'true'};
 
     </div>
   </div>
-  <footer role="contentinfo"><p>
+  <footer role="contentinfo"><script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?d41c0421b9ca44bf6db1002e7ee9759f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<p>
   Copyright &copy; 2015 - 彭笑风 -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>

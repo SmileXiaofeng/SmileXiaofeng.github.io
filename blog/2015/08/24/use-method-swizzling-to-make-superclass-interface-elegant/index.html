@@ -10,7 +10,7 @@
 
   
   <meta name="description" content="在使用Objc做IOS开发的过程中，特别是实现基类提供给他人让其通过继承获得便利的开发过程中，我们经常会碰到一种需求——即使用者重写了我们的方法，仍需要其调用基类方法。靠约定要求使用者调用[super method]则使用者很可能忘记调用而产生Bug。下面将简要说明三种解决方法，重点在于第三种， &hellip;">
-  
+  <meta name="keywords" content="Method Swizzling,继承,接口,强制,覆盖">
 
   <!-- http://t.co/dKP3o1e -->
   <meta name="HandheldFriendly" content="True">
@@ -593,7 +593,16 @@ var jiathis_config = {data_track_clickback:'true'};
 
     </div>
   </div>
-  <footer role="contentinfo"><p>
+  <footer role="contentinfo"><script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?d41c0421b9ca44bf6db1002e7ee9759f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<p>
   Copyright &copy; 2015 - 彭笑风 -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
