@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-09-17T17:20:48+08:00</updated>
+  <updated>2015-09-17T17:28:23+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -45,6 +45,12 @@
 <h3>结语</h3>
 
 <p>必须要说的是，部分国内的App服务提供商相比国外还是显得不太讲究。友盟的崩溃收集功能至今只是个半成品，使用也较为麻烦。在没有达到国外同业水平的情况下，就贸贸然默认开启服务进行推广，耗费用户流量，甚至潜藏Bug，影响用户其他功能的使用，着实不妥。做大不一定能做强，做精做细的暴雪看起来走得很慢，却将绝大部分同行远远甩在了身后。也希望友盟能静心将崩溃收集平台做好，成为一个精品功能。</p>
+
+<hr />
+
+<h3>参考链接</h3>
+
+<p><a href="http://nianxi.net/ios/ios-crash-reporter/">http://nianxi.net/ios/ios-crash-reporter/</a></p>
 ]]></content>
   </entry>
   
