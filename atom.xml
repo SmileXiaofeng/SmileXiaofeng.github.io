@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-09-17T17:28:23+08:00</updated>
+  <updated>2015-09-17T17:42:06+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Terminate_handler Unexpectedly Threw an Exception无法显示崩溃原因和调用堆栈的分析及解决办法]]></title>
+    <title type="html"><![CDATA[Terminate_handler Unexpectedly Threw an Exception无法显示崩溃原因和调用堆栈的分析及解决]]></title>
     <link href="http://smilexiaofeng.github.io/blog/2015/09/17/nsscanner-nil-string-argument-and-terminate-handler-unexpectedly-threw-an-exception-no-reason-and-crash-stack/"/>
     <updated>2015-09-17T16:00:46+08:00</updated>
     <id>http://smilexiaofeng.github.io/blog/2015/09/17/nsscanner-nil-string-argument-and-terminate-handler-unexpectedly-threw-an-exception-no-reason-and-crash-stack</id>
