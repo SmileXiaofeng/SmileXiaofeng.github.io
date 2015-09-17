@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-08-24T21:00:05+08:00</updated>
+  <updated>2015-09-17T17:20:48+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Terminate_handler Unexpectedly Threw an Exception无法显示崩溃原因和调用堆栈的分析及解决办法]]></title>
+    <link href="http://smilexiaofeng.github.io/blog/2015/09/17/nsscanner-nil-string-argument-and-terminate-handler-unexpectedly-threw-an-exception-no-reason-and-crash-stack/"/>
+    <updated>2015-09-17T16:00:46+08:00</updated>
+    <id>http://smilexiaofeng.github.io/blog/2015/09/17/nsscanner-nil-string-argument-and-terminate-handler-unexpectedly-threw-an-exception-no-reason-and-crash-stack</id>
+    <content type="html"><![CDATA[<h3>前言</h3>
+
+<p>在来到新的公司后，接手新代码并着手发开。跑代码出现崩溃时发现总是崩在main函数里，出现如下提示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>2015-09-17 15:06:35.321 Recipe_iPhoneV4[47088:418395] NSScanner: nil string argument
+</span><span class='line'>2015-09-17 15:06:35.322 Recipe_iPhoneV4[47088:418395] NSScanner: nil string argument
+</span><span class='line'>libc++abi.dylib: terminate_handler unexpectedly threw an exception</span></code></pre></td></tr></table></div></figure>
+
+
+<p>无论怎么运行都没有崩溃原因和崩溃调用堆栈，经常要靠猜崩溃原因和单步调试，导致查问题效率十分底下，浪费的时间越来越多。对于程序猿来说浪费时间简直不可忍受，于是下定决心查找原因。</p>
+
+<h3>原因分析</h3>
+
+<p>分析最后一句提示<code>terminate_handler unexpectedly threw an exception</code>，认为是系统觉得该exception很奇怪，以致于无法分析出其崩溃原因和调用堆栈。回想起<a href="http://nianxi.net/ios/ios-crash-reporter/">念茜的一篇介绍崩溃收集的文章</a>，一个未被捕获的异常产生后，到程序真正崩溃前各个崩溃平台都可以抓取该异常，即这是一个链式结构，崩溃平台作为链式结构的节点可以拿到该异常并进行分析。对于我们来说，崩溃平台怎么抓没关系，抓进去做了什么也没关系，关键在于怎么吃进去怎么吐出来就好了。一旦某个崩溃平台对该崩溃做了手脚甚至终止传递时，处于该节点后的崩溃平台及系统就很有可能分析不出崩溃原因甚至完全接收不到该异常。可以说这是个君子协定，那么就有着不被遵守的风险。</p>
+
+<p>在我来之前，我们工程中已集成了友盟，其自带了崩溃收集机制。但是很弱，它没有上传APP的符号文件，我们只能拿到未符号化的crash文件，用他提供的一个工具去进行符号化，这要求本地必须有那个archive包（在该机器上打过对应的包）才能进行解析。 于是我加入后又集成了之前使用的Crashlytics。在进行了分析后排除了Crashlytics的嫌疑，目光转向了友盟。在测试后发现，只要关闭其崩溃收集开关，XCode的调试框就能正常显示崩溃原因和崩溃调用堆栈了。</p>
+
+<h3>解决办法</h3>
+
+<p>友盟默认是打开崩溃收集机制的。要关闭它的话，只要在<code>[MobClick startWithAppkey:kUmengAppKey reportPolicy:REALTIME channelId:channelID];</code>前加上<code>[MobClick setCrashReportEnabled:NO];</code>就可以解决该问题了。若是集成了非友盟的其他崩溃收集平台且出现该问题，也可以尝试暂时关闭该功能，若关闭后调试框能出现崩溃原因及堆栈，那么几乎就可以定位是该平台造成的原因了。</p>
+
+<h3>结语</h3>
+
+<p>必须要说的是，部分国内的App服务提供商相比国外还是显得不太讲究。友盟的崩溃收集功能至今只是个半成品，使用也较为麻烦。在没有达到国外同业水平的情况下，就贸贸然默认开启服务进行推广，耗费用户流量，甚至潜藏Bug，影响用户其他功能的使用，着实不妥。做大不一定能做强，做精做细的暴雪看起来走得很慢，却将绝大部分同行远远甩在了身后。也希望友盟能静心将崩溃收集平台做好，成为一个精品功能。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[通过Method Swizzling让基类接口更优雅]]></title>
