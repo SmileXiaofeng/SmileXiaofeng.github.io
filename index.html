@@ -107,7 +107,7 @@
 
 <h3>解决思路</h3>
 
-<p>之前也有统一代码风格的需求，所以使用了一款优秀的Xcode插件——<a href="https://github.com/travisjeffery/ClangFormat-Xcode">ClangFormat-Xcode</a>，可以选取xcode中的代码进行format。但这样做有两个缺点：第一是非自动，需要手动选取代码做format，显得麻烦。第二是一旦其他团队成员没有主动对自己的代码进行format，那么代码风格还是五花八门。找到关键问题后解决思路就很清晰了，我们既然缺乏自动和强制，那么git的hooks就是非常好的选择。这些钩子会在git运行中各个事件的前后自动触发，可以做自己的处理。在思考后我选择了pre-commit这个钩子。因为commit是一个较为稳定的结构，且还没有影响到共有仓库。那么只要我们在提交前找到这次提交改动的代码，对代码进行format后再提交，那么仓库里的就都是统一风格的代码。</p>
+<p>之前也有统一代码风格的需求，所以使用了一款优秀的Xcode插件——<a href="https://github.com/travisjeffery/ClangFormat-Xcode">ClangFormat-Xcode</a>，可以选取xcode中的代码进行format。但这样做有两个缺点：第一是非自动，需要手动选取代码做format，显得麻烦。第二是一旦其他团队成员没有主动对自己的代码进行format，那么代码风格还是五花八门。找到关键问题后解决思路就很清晰了，我们既然缺乏自动和强制，那么git的hooks就是非常好的选择。这些钩子会在git运行中各个事件的前后自动触发，可以做自己的处理。在思考后我选择了pre-commit这个钩子。因为commit是一个较为稳定的结构，且在提交前还没有影响到仓库。那么只要我们在提交前找到这次提交改动的代码，对代码进行format后再提交，那么仓库里的就都是统一风格的代码。</p>
 
 <p>为了了解ClangFormat-Xcode是怎么format代码的，我阅读了它的源代码，发现其底层调用的是LLVM的ClangFormat程序，于是转向了ClangFormat。在LLVM的开源代码里，我找到了clang-format-diff.py，在稍作修改后便可以使用本地的配置文件配置代码风格了。用户提交——触发pre-commit钩子——对用户改动的代码进行format——继续提交，思路简单明晰。</p>
 
