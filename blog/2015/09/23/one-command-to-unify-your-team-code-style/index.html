@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>一条命令行自动统一团队代码风格 - 彭笑风的技术博客</title>
+  <meta name="author" content="彭笑风">
+
+  
+  <meta name="description" content="团队开发项目时，代码风格统一始终是个老大难的问题。指针星号靠左靠右？一行代码最多显示多少字符？左花括号是否空行？其实并没有一个绝对正确的答案，但若没有一个统一的风格，项目代码看起来就会五花八门，毫无美感。然而保持统一代码风格所需成本很高，制定一个统一的风格指南已是难事（ &hellip;">
+  <meta name="keywords" content="code style,team,代码风格,统一,团队">
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://smilexiaofeng.github.io/blog/2015/09/23/one-command-to-unify-your-team-code-style/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="彭笑风的技术博客" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://cdn.staticfile.org/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">彭笑风的技术博客</a></h1>
+  
+    <h2>学习，坚持，分享，成长</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="smilexiaofeng.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">首页</a></li>
+  <li><a href="/blog/archives">所有文章</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">一条命令行自动统一团队代码风格</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-09-23T09:43:55+08:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2015</span></span> <span class='time'>9:43 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>团队开发项目时，代码风格统一始终是个老大难的问题。指针星号靠左靠右？一行代码最多显示多少字符？左花括号是否空行？其实并没有一个绝对正确的答案，但若没有一个统一的风格，项目代码看起来就会五花八门，毫无美感。然而保持统一代码风格所需成本很高，制定一个统一的风格指南已是难事（例如<a href="https://google.github.io/styleguide/objcguide.xml">Google的Objc代码风格指南</a>），更何况要说服团队成员完全学习遵守？再加上code review和争论的可能，许多团队默认团队成员"尽情发挥”也就情有可原了。</p>
+
+<p>为了解决这个问题，我开发了一个小工具，可以在git commit前使用Clang-format对提交的新代码进行format，LLVM, Google, Chromium, Mozilla, WebKit等基础风格任君选择，再加上数十种style options选项，相信能够满足绝大部分的代码风格需求。优点在于与项目工程隔离，在安装完成后Format完全自动进行，且安装很方便。</p>
+
+<h3>安装方法</h3>
+
+<p>先切换到目标工程的目录之下，在终端执行一条命令：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>####first cd to the target project 
+</span><span class='line'>wget -O - https://raw.github.com/SmileXiaofeng/AutoUnifyCodeStyle/master/install | bash</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装便完成了。之后在项目根目录下会多出三个文件，.clang-format，clang-format与clang-format-diff.py。只需要将.clang-format提到git上进行共享，另外两个可以提到.gitignore中而不进入仓库。所有的风格选项都可在.clang-format中进行编辑，<a href="http://clang.llvm.org/docs/ClangFormatStyleOptions.html">具体可阅读风格选项文档</a>。记得安装是针对单个用户单个项目的，每个团队成员都需要进行上述安装。</p>
+
+<p>这里是<a href="https://github.com/SmileXiaofeng/AutoUnitCodeStyle">github项目地址</a>。</p>
+
+<h3>解决思路</h3>
+
+<p>之前也有统一代码风格的需求，所以使用了一款优秀的Xcode插件——<a href="https://github.com/travisjeffery/ClangFormat-Xcode">ClangFormat-Xcode</a>，可以选取xcode中的代码进行format。但这样做有两个缺点：第一是非自动，需要手动选取代码做format，显得麻烦。第二是一旦其他团队成员没有主动对自己的代码进行format，那么代码风格还是五花八门。找到关键问题后解决思路就很清晰了，我们既然缺乏自动和强制，那么git的hooks就是非常好的选择。这些钩子会在git运行中各个事件的前后自动触发，可以做自己的处理。在思考后我选择了pre-commit这个钩子。因为commit是一个较为稳定的结构，且还没有影响到共有仓库。那么只要我们在提交前找到这次提交改动的代码，对代码进行format后再提交，那么仓库里的就都是统一风格的代码。</p>
+
+<p>为了了解ClangFormat-Xcode是怎么format代码的，我阅读了它的源代码，发现其底层调用的是LLVM的ClangFormat程序，于是转向了ClangFormat。在LLVM的开源代码里，我找到了clang-format-diff.py，在稍作修改后便可以使用本地的配置文件配置代码风格了。用户提交——触发pre-commit钩子——对用户改动的代码进行format——继续提交，思路简单明晰。</p>
+
+<h3>结语</h3>
+
+<p>这是我的第一个github开源项目，希望以后能多为开源社区做出一些贡献。安装方法已经写在上面啦，希望大家能体验一下，在我们团队使用的过程中感觉效果还是相当好的^_^。另外由于水平时间所限，若有问题欢迎交流指正。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">彭笑风</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-09-23T09:43:55+08:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2015</span></span> <span class='time'>9:43 am</span></time>
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+     <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+	<span class="jiathis_txt">分享到：</span>
+	<a class="jiathis_button_tools_1"></a>
+	<a class="jiathis_button_tools_2"></a>
+	<a class="jiathis_button_tools_3"></a>
+	<a class="jiathis_button_tools_4"></a>
+	<a href="http://www.jiathis.com/share?uid=2049882" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank">更多</a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript">
+var jiathis_config = {data_track_clickback:'true'};
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=2049882" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+<!-- UY BEGIN -->
+<div id="uyan_frame"></div>
+<script type="text/javascript" src="http://v2.uyan.cc/code/uyan.js?uid=2049882"></script>
+<!-- UY END -->
+
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/09/17/nsscanner-nil-string-argument-and-terminate-handler-unexpectedly-threw-an-exception-no-reason-and-crash-stack/" title="Previous Post: terminate_handler unexpectedly threw an exception无法显示崩溃原因和调用堆栈的分析及解决">&laquo; terminate_handler unexpectedly threw an exception无法显示崩溃原因和调用堆栈的分析及解决</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>最新文章</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2015/09/23/one-command-to-unify-your-team-code-style/">一条命令行自动统一团队代码风格</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/17/nsscanner-nil-string-argument-and-terminate-handler-unexpectedly-threw-an-exception-no-reason-and-crash-stack/">Terminate_handler Unexpectedly Threw an Exception无法显示崩溃原因和调用堆栈的分析及解决</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/24/use-method-swizzling-to-make-superclass-interface-elegant/">通过Method Swizzling让基类接口更优雅</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/08/11/why-do-not-use-accessor-in-init-and-dealloc/">为什么不要在init和dealloc函数中使用accessor</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>About Me</h1>
+  <p>IOS开发者，对技术狂热，对人真诚。曾在网易工作过两年，现已回到长沙。希望能和你分享在开发过程中的一些小小心得。
+<br />
+<br />
+新浪微博：<a href="http://weibo.com/smilepengxiaofeng">Smile笑风</a>
+<br />
+常用邮箱：pengxfsmile@gmail.com
+<br />
+</p>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "//hm.baidu.com/hm.js?d41c0421b9ca44bf6db1002e7ee9759f";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+<p>
+  Copyright &copy; 2015 - 彭笑风 -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

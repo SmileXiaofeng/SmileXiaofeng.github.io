@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-09-18T10:38:47+08:00</updated>
+  <updated>2015-09-23T11:50:05+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -12,6 +12,41 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[一条命令行自动统一团队代码风格]]></title>
+    <link href="http://smilexiaofeng.github.io/blog/2015/09/23/one-command-to-unify-your-team-code-style/"/>
+    <updated>2015-09-23T09:43:55+08:00</updated>
+    <id>http://smilexiaofeng.github.io/blog/2015/09/23/one-command-to-unify-your-team-code-style</id>
+    <content type="html"><![CDATA[<p>团队开发项目时，代码风格统一始终是个老大难的问题。指针星号靠左靠右？一行代码最多显示多少字符？左花括号是否空行？其实并没有一个绝对正确的答案，但若没有一个统一的风格，项目代码看起来就会五花八门，毫无美感。然而保持统一代码风格所需成本很高，制定一个统一的风格指南已是难事（例如<a href="https://google.github.io/styleguide/objcguide.xml">Google的Objc代码风格指南</a>），更何况要说服团队成员完全学习遵守？再加上code review和争论的可能，许多团队默认团队成员"尽情发挥”也就情有可原了。</p>
+
+<p>为了解决这个问题，我开发了一个小工具，可以在git commit前使用Clang-format对提交的新代码进行format，LLVM, Google, Chromium, Mozilla, WebKit等基础风格任君选择，再加上数十种style options选项，相信能够满足绝大部分的代码风格需求。优点在于与项目工程隔离，在安装完成后Format完全自动进行，且安装很方便。</p>
+
+<h3>安装方法</h3>
+
+<p>先切换到目标工程的目录之下，在终端执行一条命令：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>####first cd to the target project 
+</span><span class='line'>wget -O - https://raw.github.com/SmileXiaofeng/AutoUnifyCodeStyle/master/install | bash</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装便完成了。之后在项目根目录下会多出三个文件，.clang-format，clang-format与clang-format-diff.py。只需要将.clang-format提到git上进行共享，另外两个可以提到.gitignore中而不进入仓库。所有的风格选项都可在.clang-format中进行编辑，<a href="http://clang.llvm.org/docs/ClangFormatStyleOptions.html">具体可阅读风格选项文档</a>。记得安装是针对单个用户单个项目的，每个团队成员都需要进行上述安装。</p>
+
+<p>这里是<a href="https://github.com/SmileXiaofeng/AutoUnitCodeStyle">github项目地址</a>。</p>
+
+<h3>解决思路</h3>
+
+<p>之前也有统一代码风格的需求，所以使用了一款优秀的Xcode插件——<a href="https://github.com/travisjeffery/ClangFormat-Xcode">ClangFormat-Xcode</a>，可以选取xcode中的代码进行format。但这样做有两个缺点：第一是非自动，需要手动选取代码做format，显得麻烦。第二是一旦其他团队成员没有主动对自己的代码进行format，那么代码风格还是五花八门。找到关键问题后解决思路就很清晰了，我们既然缺乏自动和强制，那么git的hooks就是非常好的选择。这些钩子会在git运行中各个事件的前后自动触发，可以做自己的处理。在思考后我选择了pre-commit这个钩子。因为commit是一个较为稳定的结构，且还没有影响到共有仓库。那么只要我们在提交前找到这次提交改动的代码，对代码进行format后再提交，那么仓库里的就都是统一风格的代码。</p>
+
+<p>为了了解ClangFormat-Xcode是怎么format代码的，我阅读了它的源代码，发现其底层调用的是LLVM的ClangFormat程序，于是转向了ClangFormat。在LLVM的开源代码里，我找到了clang-format-diff.py，在稍作修改后便可以使用本地的配置文件配置代码风格了。用户提交——触发pre-commit钩子——对用户改动的代码进行format——继续提交，思路简单明晰。</p>
+
+<h3>结语</h3>
+
+<p>这是我的第一个github开源项目，希望以后能多为开源社区做出一些贡献。安装方法已经写在上面啦，希望大家能体验一下，在我们团队使用的过程中感觉效果还是相当好的^_^。另外由于水平时间所限，若有问题欢迎交流指正。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Terminate_handler Unexpectedly Threw an Exception无法显示崩溃原因和调用堆栈的分析及解决]]></title>
