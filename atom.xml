@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-09-23T12:00:19+08:00</updated>
+  <updated>2015-09-25T11:24:53+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -35,6 +35,18 @@
 <p>安装便完成了。之后在项目根目录下会多出三个文件，.clang-format，clang-format与clang-format-diff.py。只需要将.clang-format提到git上进行共享，另外两个可以提到.gitignore中而不进入仓库。所有的风格选项都可在.clang-format中进行编辑，<a href="http://clang.llvm.org/docs/ClangFormatStyleOptions.html">具体可阅读风格选项文档</a>。记得安装是针对单个用户单个项目的，每个团队成员都需要进行上述安装。</p>
 
 <p>这里是<a href="https://github.com/SmileXiaofeng/AutoUnitCodeStyle">github项目地址</a>。</p>
+
+<p>在安装完成后，可以做一个简单的测试。在一个函数内，不带缩进的写一句代码。如</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>- (void)func {
+</span><span class='line'>int t = 1;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>若在做了git commit后发现工程代码出现了缩进，则表示安装已经完成。接下来，可以尽情地配置自己的.clang-format文件了。</p>
 
 <h3>解决思路</h3>
 
