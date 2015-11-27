@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-09-25T11:24:53+08:00</updated>
+  <updated>2015-11-27T10:50:38+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -12,6 +12,215 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[如何更改IOS程序所有字体的类型]]></title>
+    <link href="http://smilexiaofeng.github.io/blog/2015/11/26/ios-modify-all-font-type-in-app/"/>
+    <updated>2015-11-26T16:21:33+08:00</updated>
+    <id>http://smilexiaofeng.github.io/blog/2015/11/26/ios-modify-all-font-type-in-app</id>
+    <content type="html"><![CDATA[<p>设计汪：系统字体太难看，改改改，全都改成Helvetica吧</p>
+
+<p>程序猿：不改，程序规模这么大，不说代码里那么多语句需要改，xib和storyboard里的更需要一个个手动去改，不知道得花多少时间。</p>
+
+<p>设计汪：这已经和老板定好了。老板特别喜欢，不改老板就不开心，不开心奖金就少，还是改改吧。</p>
+
+<p>程序猿经不住软磨硬泡，眼睛都挑花了，终于一个个改好了。</p>
+
+<p>…&hellip;</p>
+
+<p>设计汪：老板觉得太粗了，还是用HelveticaNeue-light吧。</p>
+
+<p>程序猿：WQNML%￥&amp;*#%#%#@￥%</p>
+
+<p>程序的字体是设计规范的一种，一改则动全身，作为一个优雅的工(cheng)程(xu)师(yuan)，一个个去修改显然是不可容忍的。那么，如何做到只修改一次呢？</p>
+
+<p>首先，我们想到在一个公共头文件中定义一个宏：</p>
+
+<p><code>#define kAppFontTypeName @"HelveticaNeue-light"</code></p>
+
+<p>将来修改字体只需要改这个宏就OK了。</p>
+
+<p>字体的设置不外乎通过代码和nib/storyboard,下面我们先来看代码怎么处理。</p>
+
+<h3>In Code</h3>
+
+<p>若之前没有特地定过字体，一般我们都是通过<code>+ (UIFont *)systemFontOfSize:(CGFloat)fontSize;</code>这个函数来创建字体的，那么只要通过分类重写它的实现就好了。</p>
+
+<p>创建一个UIFont分类，命名为（AppFont）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#import "UIFont+AppFont.h"
+</span><span class='line'>
+</span><span class='line'>@implementation UIFont (AppFont)
+</span><span class='line'>
+</span><span class='line'>#pragma clang diagnostic push
+</span><span class='line'>#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
+</span><span class='line'>
+</span><span class='line'>+ (UIFont *)systemFontOfSize:(CGFloat)fontSize {
+</span><span class='line'>    return [UIFont fontWithName:kAppFontTypeName  size:fontSize];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>#pragma clang diagnostic pop
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>若之前有部分代码并非通过<code>+ (UIFont *)systemFontOfSize:(CGFloat)fontSize;</code>该方法来创建字体，可以选择将其统一，或者在AppFont分类中再重写所用的方法。</p>
+
+<h3>In Nib/Storyboard</h3>
+
+<p>Nib/Storyboard中的UI元素在显示到屏幕之前，必会调用一个方法：<code>- (void)awakeFromNib;</code>。我们可以考虑通过Method Swizzling的方式偷天换日，在其显示到屏幕前替换其字体为我们想要的字体。</p>
+
+<p><a href="http://nshipster.com/method-swizzling/">Method Swizzling</a>在此不展开讲，简单说就是通过运行时机制改变类的某个方法的实现或者在其之前或之后插入一段代码。该功能很强大，甚至可以改变系统类的实现，且苹果并不禁止我们使用。UI元素需要改字体的一般有UILabel，UIButton,UITextFied和UITextView，下面我们通过创建分类的方式一个个做修改。</p>
+
+<p>UILabel+OverrideBaseFont:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#import "UILabel+OverrideBaseFont.h"
+</span><span class='line'>#import "Aspects.h"
+</span><span class='line'>
+</span><span class='line'>@implementation UILabel (OverrideBaseFont)
+</span><span class='line'>
+</span><span class='line'>+ (void)load {
+</span><span class='line'>    [[self class]aspect_hookSelector:@selector(awakeFromNib) withOptions:AspectPositionAfter usingBlock:^(id&lt;AspectInfo&gt; aspectInfo) {
+</span><span class='line'>        UILabel* instance = [aspectInfo instance];
+</span><span class='line'>        UIFont* font = [UIFont fontWithName:kAppFontTypeName size:instance.font.pointSize];
+</span><span class='line'>        instance.font = font;
+</span><span class='line'>    }error:nil];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>UIButton+OverrideBaseFont:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#import "UIButton+OverrideBaseFont.h"
+</span><span class='line'>#import "Aspects.h"
+</span><span class='line'>
+</span><span class='line'>@implementation UIButton (OverrideBaseFont)
+</span><span class='line'>
+</span><span class='line'>+ (void)load {
+</span><span class='line'>    [[self class]aspect_hookSelector:@selector(awakeFromNib) withOptions:AspectPositionAfter usingBlock:^(id&lt;AspectInfo&gt; aspectInfo) {
+</span><span class='line'>        UIButton* instance = [aspectInfo instance];
+</span><span class='line'>        UILabel* label = instance.titleLabel;
+</span><span class='line'>        UIFont* font = [UIFont fontWithName:kAppFontTypeName size:label.font.pointSize];
+</span><span class='line'>        instance.titleLabel.font = font;
+</span><span class='line'>    }error:nil];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>UITextField+OverrideBaseFont:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#import "UITextField+OverrideBaseFont.h"
+</span><span class='line'>#import "Aspects.h"
+</span><span class='line'>
+</span><span class='line'>@implementation UITextField (OverrideBaseFont)
+</span><span class='line'>
+</span><span class='line'>+ (void)load {
+</span><span class='line'>    [[self class]aspect_hookSelector:@selector(awakeFromNib) withOptions:AspectPositionAfter usingBlock:^(id&lt;AspectInfo&gt; aspectInfo) {
+</span><span class='line'>        UITextField* instance = [aspectInfo instance];
+</span><span class='line'>        UIFont* font = [UIFont fontWithName:kAppFontTypeName size:instance.font.pointSize];
+</span><span class='line'>        instance.font = font;
+</span><span class='line'>    }error:nil];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>UITextView+OverrideBaseFont:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#import "UITextView+OverrideBaseFont.h"
+</span><span class='line'>#import "Aspects.h"
+</span><span class='line'>
+</span><span class='line'>@implementation UITextView (OverrideBaseFont)
+</span><span class='line'>
+</span><span class='line'>+ (void)load {
+</span><span class='line'>    [[self class]aspect_hookSelector:@selector(awakeFromNib) withOptions:AspectPositionAfter usingBlock:^(id&lt;AspectInfo&gt; aspectInfo) {
+</span><span class='line'>        UITextView* instance = [aspectInfo instance];
+</span><span class='line'>        UIFont* font = [UIFont fontWithName:kAppFontTypeName size:instance.font.pointSize];
+</span><span class='line'>        instance.font = font;
+</span><span class='line'>    }error:nil];
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>@end</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样，几乎APP内所有的字体都被替换成了我们宏定义的字体，如果想要换一种字体，只需要改变宏的字体名，非常简单。</p>
+
+<p>App的字体类型是一种设计规范，属于整体范畴，同时，xib/storyboard中很多字体的设置由系统原生控件所控制，这样就很适用于AOP与Method Swizzling。之后若有时间，可能会分享下自己在编程过程中对Method Swizzling的运用。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[一条命令行自动统一团队代码风格]]></title>
