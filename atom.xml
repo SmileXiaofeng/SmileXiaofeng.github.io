@@ -4,7 +4,7 @@
   <title><![CDATA[彭笑风的技术博客]]></title>
   <link href="http://smilexiaofeng.github.io/atom.xml" rel="self"/>
   <link href="http://smilexiaofeng.github.io/"/>
-  <updated>2015-11-27T10:50:38+08:00</updated>
+  <updated>2015-11-27T11:03:51+08:00</updated>
   <id>http://smilexiaofeng.github.io/</id>
   <author>
     <name><![CDATA[彭笑风]]></name>
@@ -84,7 +84,7 @@
 
 <p>Nib/Storyboard中的UI元素在显示到屏幕之前，必会调用一个方法：<code>- (void)awakeFromNib;</code>。我们可以考虑通过Method Swizzling的方式偷天换日，在其显示到屏幕前替换其字体为我们想要的字体。</p>
 
-<p><a href="http://nshipster.com/method-swizzling/">Method Swizzling</a>在此不展开讲，简单说就是通过运行时机制改变类的某个方法的实现或者在其之前或之后插入一段代码。该功能很强大，甚至可以改变系统类的实现，且苹果并不禁止我们使用。UI元素需要改字体的一般有UILabel，UIButton,UITextFied和UITextView，下面我们通过创建分类的方式一个个做修改。</p>
+<p><a href="http://nshipster.com/method-swizzling/">Method Swizzling</a>在此不展开讲，简单说就是通过运行时机制改变类的某个方法的实现或者在其之前或之后插入一段代码。该功能很强大，甚至可以改变系统类的实现，且苹果并不禁止我们使用。<a href="https://github.com/steipete/Aspects">Aspects</a>是一个轻量的AOP库，接口简单，使用方便，可以通过Cocoapods安装，也可以直接下载Aspects.h/m添加进工程。通过它可以很容易地实现Method Swizzling。UI元素需要改字体的一般有UILabel，UIButton,UITextFied和UITextView，下面我们通过创建分类的方式一个个做修改。</p>
 
 <p>UILabel+OverrideBaseFont:</p>
 
